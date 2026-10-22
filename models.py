@@ -1,7 +1,9 @@
 import json
 import boto3
-from sqlalchemy import BigInteger, ForeignKey, String, Text, DateTime, func, create_engine
+from sqlalchemy import BigInteger, Integer, ForeignKey, String, Text, DateTime, func, create_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
+
+PrimaryKeyType = BigInteger().with_variant(Integer, "sqlite")
 
 
 def get_database_url() -> str:
@@ -35,7 +37,7 @@ class Base(DeclarativeBase):
 class Conversation(Base):
     __tablename__ = "conversations"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    id: Mapped[int] = mapped_column(PrimaryKeyType, primary_key=True, autoincrement=True,)
     title: Mapped[str] = mapped_column(String, nullable=False)
     created_at: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
@@ -50,9 +52,9 @@ class Conversation(Base):
 class Message(Base):
     __tablename__ = "messages"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    id: Mapped[int] = mapped_column(PrimaryKeyType, primary_key=True,autoincrement=True)
     conversation_id: Mapped[int] = mapped_column(
-        BigInteger,
+        PrimaryKeyType,
         ForeignKey("conversations.id", ondelete="CASCADE"),
         nullable=False,
     )
