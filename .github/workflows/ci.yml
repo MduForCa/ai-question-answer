@@ -36,7 +36,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::706421610791:role/github-actions-ecr
-          aws-region: us-east-1
+          aws-region: eu-north-1
 
       - name: Login to Amazon ECR
         if: github.event_name == 'push'
@@ -45,6 +45,12 @@ jobs:
 
       - name: Build and push image to ECR
         if: github.event_name == 'push'
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ai-assistant-backend
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t ${{ steps.login-ecr.outputs.registry }}/MduForCa:latest .
-          docker push ${{ steps.login-ecr.outputs.registry }}/MduForCa:latest
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG \
+                       -t $REGISTRY/$REPOSITORY:latest .
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/$REPOSITORY:latest
